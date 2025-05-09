@@ -1,0 +1,154 @@
+package com.student.jdbc;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.sql.*;
+import java.util.ArrayList;
+
+public class studentForm extends JFrame {
+
+    JTextField nameField, emailField, ageField, courseField;
+    JButton insertButton, updateButton, deleteButton, viewButton, exitButton;
+
+    public studentForm() {
+        setTitle("Student Management System");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(450, 350);
+        setLayout(new BorderLayout(10, 10));
+
+        // Top panel for inputs
+        JPanel formPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        formPanel.add(new JLabel("Name:"));
+        nameField = new JTextField();
+        formPanel.add(nameField);
+
+        formPanel.add(new JLabel("Email:"));
+        emailField = new JTextField();
+        formPanel.add(emailField);
+
+        formPanel.add(new JLabel("Age:"));
+        ageField = new JTextField();
+        formPanel.add(ageField);
+
+        formPanel.add(new JLabel("Course:"));
+        courseField = new JTextField();
+        formPanel.add(courseField);
+
+        add(formPanel, BorderLayout.CENTER);
+
+        // Bottom panel for buttons
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 5, 5, 5));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+
+        insertButton = new JButton("Insert");
+        updateButton = new JButton("Update");
+        deleteButton = new JButton("Delete");
+        viewButton = new JButton("View");
+        exitButton = new JButton("Exit");
+
+        buttonPanel.add(insertButton);
+        buttonPanel.add(updateButton);
+        buttonPanel.add(deleteButton);
+        buttonPanel.add(viewButton);
+        buttonPanel.add(exitButton);
+
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+
+        // Insert
+        insertButton.addActionListener(e -> {
+            try {
+                Connection con = DBConnectionDemo.getConnection();
+                String sql = "INSERT INTO students (name, email, age, course) VALUES (?, ?, ?, ?)";
+                PreparedStatement ps = con.prepareStatement(sql);
+                ps.setString(1, nameField.getText());
+                ps.setString(2, emailField.getText());
+                ps.setInt(3, Integer.parseInt(ageField.getText()));
+                ps.setString(4, courseField.getText());
+
+                int rows = ps.executeUpdate();
+                JOptionPane.showMessageDialog(this, "Student inserted!");
+                con.close();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
+        });
+
+        // Update
+        updateButton.addActionListener(e -> {
+            try {
+                Connection con = DBConnectionDemo.getConnection();
+                String sql = "UPDATE students SET name=?, age=?, course=? WHERE email=?";
+                PreparedStatement ps = con.prepareStatement(sql);
+                ps.setString(1, nameField.getText());
+                ps.setInt(2, Integer.parseInt(ageField.getText()));
+                ps.setString(3, courseField.getText());
+                ps.setString(4, emailField.getText());
+
+                int rows = ps.executeUpdate();
+                JOptionPane.showMessageDialog(this, rows > 0 ? "Student updated!" : "Student not found.");
+                con.close();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
+        });
+
+        // Delete
+        deleteButton.addActionListener(e -> {
+            try {
+                Connection con = DBConnectionDemo.getConnection();
+                String sql = "DELETE FROM students WHERE email=?";
+                PreparedStatement ps = con.prepareStatement(sql);
+                ps.setString(1, emailField.getText());
+
+                int rows = ps.executeUpdate();
+                JOptionPane.showMessageDialog(this, rows > 0 ? "Student deleted!" : "Student not found.");
+                con.close();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
+        });
+
+        // View
+        viewButton.addActionListener(e -> {
+            try {
+                Connection con = DBConnectionDemo.getConnection();
+                String sql = "SELECT * FROM students";
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery();
+
+                ArrayList<String> columns = new ArrayList<>();
+                ResultSetMetaData rsmd = rs.getMetaData();
+                int colCount = rsmd.getColumnCount();
+                for (int i = 1; i <= colCount; i++) {
+                    columns.add(rsmd.getColumnName(i));
+                }
+
+                ArrayList<Object[]> rows = new ArrayList<>();
+                while (rs.next()) {
+                    Object[] row = new Object[colCount];
+                    for (int i = 0; i < colCount; i++) {
+                        row[i] = rs.getObject(i + 1);
+                    }
+                    rows.add(row);
+                }
+
+                JTable table = new JTable(rows.toArray(new Object[0][]), columns.toArray());
+                JScrollPane scrollPane = new JScrollPane(table);
+                JOptionPane.showMessageDialog(this, scrollPane, "Student List", JOptionPane.PLAIN_MESSAGE);
+
+                con.close();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+            }
+        });
+
+        // Exit
+        exitButton.addActionListener(e -> System.exit(0));
+    }
+}
