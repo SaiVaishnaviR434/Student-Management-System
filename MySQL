@@ -1,0 +1,17 @@
+
+## 🧾 Database Schema (MySQL)
+
+Create the following database and table in **MySQL Workbench** or **MySQL CLI**:
+
+```sql
+CREATE DATABASE student_db;
+
+
+
+CREATE TABLE students (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    age INT,
+    course VARCHAR(100)
+);
