@@ -1,0 +1,72 @@
+package com.student.jdbc;
+
+import java.sql.*;
+import java.util.*;
+
+public class studentDAO {
+
+ public void addStudent(student student) {
+     try (Connection con = DBConnectionDemo.getConnection()) {
+         String query = "INSERT INTO students (name, age, course, email) VALUES (?, ?, ?, ?)";
+         PreparedStatement ps = con.prepareStatement(query);
+         ps.setString(1, student.name);
+         ps.setInt(2, student.age);
+         ps.setString(3, student.course);
+         ps.setString(4, student.email);
+         ps.executeUpdate();
+         System.out.println("Student added successfully!");
+     } catch (Exception e) {
+         e.printStackTrace();
+     }
+ }
+
+ public void viewStudents() {
+     try (Connection con = DBConnectionDemo.getConnection()) {
+         String query = "SELECT * FROM students";
+         Statement st = con.createStatement();
+         ResultSet rs = st.executeQuery(query);
+         while (rs.next()) {
+             System.out.println(
+                 rs.getInt("id") + " | " +
+                 rs.getString("name") + " | " +
+                 rs.getInt("age") + " | " +
+                 rs.getString("course") + " | " +
+                 rs.getString("email")
+             );
+         }
+     } catch (Exception e) {
+         e.printStackTrace();
+     }
+ }
+
+ public void deleteStudent(int id) {
+     try (Connection con = DBConnectionDemo.getConnection()) {
+         String query = "DELETE FROM students WHERE id = ?";
+         PreparedStatement ps = con.prepareStatement(query);
+         ps.setInt(1, id);
+         int rows = ps.executeUpdate();
+         if (rows > 0)
+             System.out.println("Student deleted successfully.");
+         else
+             System.out.println("Student ID not found.");
+     } catch (Exception e) {
+         e.printStackTrace();
+     }
+ }
+
+ public void updateStudent(student student) {
+     try (Connection con = DBConnectionDemo.getConnection()) {
+         String query = "UPDATE students SET name=?, age=?, course=?, email=? WHERE id=?";
+         PreparedStatement ps = con.prepareStatement(query);
+         ps.setString(1, student.name);
+         ps.setInt(2, student.age);
+         ps.setString(3, student.course);
+         ps.setString(4, student.email);
+         ps.setInt(5, student.id);
+         ps.executeUpdate();
+         System.out.println("Student updated successfully!");
+     } catch (Exception e) {
+         e.printStackTrace();
+     }
+ }
+}
