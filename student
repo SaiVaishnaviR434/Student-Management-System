@@ -1,0 +1,9 @@
+package com.student.jdbc;
+
+public class student {
+ int id;
+ String name;
+ int age;
+ String course;
+ String email;
+}
